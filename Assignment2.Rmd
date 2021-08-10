@@ -7,24 +7,204 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
 ```
 
-## R Markdown
+### Potential outcomes, selection bias and the perfect doctor
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+***1.	Consider the simple hypothetical example in Table 1.  This example involves eleven patients each of whom is infected with coronavirus. There are two treatments: ventilators and bedrest.  Table 1 displays each patient’s potential outcomes in terms of years of post-treatment survival under each treatment. Larger outcome values correspond to better health outcomes.*** 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r echo=FALSE, results='asis'}
+tabla1 <- tibble::tribble(
+  ~Patient, ~Y1, ~Y0, ~Age, ~TE, ~D, ~Y,
+        1L,  1L, 10L,  29L,  NA, NA, NA,
+        2L,  1L,  5L,  35L,  NA, NA, NA,
+        3L,  1L,  4L,  19L,  NA, NA, NA,
+        4L,  5L,  6L,  45L,  NA, NA, NA,
+        5L,  5L,  1L,  65L,  NA, NA, NA,
+        6L,  6L,  7L,  50L,  NA, NA, NA,
+        7L,  7L,  8L,  77L,  NA, NA, NA,
+        8L,  7L, 10L,  18L,  NA, NA, NA,
+        9L,  8L,  2L,  85L,  NA, NA, NA,
+       10L,  9L,  6L,  96L,  NA, NA, NA,
+       11L, 10L,  7L,  77L,  NA, NA, NA
+  )
 
-```{r cars}
-summary(cars)
+knitr::kable(tabla1 %>% select(-(TE:Y)), caption = "Table 1")
+
 ```
 
-## Including Plots
+**a.	Provide an example of how SUTVA might be violated for treatments of covid-19.**
 
-You can also embed plots, for example:
+Stable unit treatment value assumption (SUTVA) requires that the potential outcome observation on one unit should be unaffected by the particular assignment of treatments to the other units. So, it has to be stable (everyone receives the same 'dosage', e.g. by unvarying quality of ventilators), without externalities (maybe if patients see that other patients get better they might also get better), and with an assumption of partial equilibrium (scale might be an issue causing problems to external validity).
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+**b.	Calculate each unit’s treatment effect (TE).**
+
+```{r, echo=FALSE, results='asis'}
+tabla.te <- tabla1 %>% mutate(TE= Y1-Y0)
+
+knitr::kable(tabla.te %>% select(-D,-Y), caption = "b. Treatment Effect")
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+**c.	What is the average treatment effect for ventilators compared to bedrest?  Which type of intervention is more effective on average?**
+
+```{r, include = FALSE}
+
+average.TE <- tabla.te %>% summarize(average.TE = mean(TE)) %>% round(2)
+average.TE
+
+```
+
+The average treatment effect for ventilators is **`r average.TE$average.TE`**. It is a worse intervention on average, since it lowers health outcomes.
+
+**d.	Suppose the “perfect doctor” knows each patient’s potential outcomes and as a result chooses the best treatment for each patient. If she assigns each patient to the treatment more beneficial for that patient, which patients will receive ventilators and which will receive bedrest? Fill in the remaining missing columns based on what the perfect doctor chooses.**
+
+```{r, echo=FALSE}
+tabla.phd <- tabla.te %>% mutate(D = as.numeric(Y1>Y0),Y = ifelse(D == 0, Y0,Y1))
+
+kableExtra::kbl(tabla.phd, caption = "d. The Perfect Doctor arrives") %>% 
+  kableExtra::kable_styling() %>% 
+  kableExtra::column_spec(6, background = ifelse(tabla.phd$D ==1, "green", "red"),color = "white")
+
+
+```
+
+
+**e.	Calculate the simple difference in outcomes.  How similar is it to the ATE?**
+
+```{r, include = FALSE}
+
+SDO <- tabla.phd
+
+SDO.coef <- lm(SDO$Y ~ SDO$D)$coef[2] %>% round(2) # or (5+8+9+10)/4-(10+5+4+6+7+8+10)/7
+
+
+```
+
+
+The SDO is **`r SDO.coef`**, and it differs with the ATE by **`r SDO.coef-average.TE$average.TE`** health outcome units. 
+
+
+**f.	Calculate the ATT and the ATU. How similar are each of these to the SDO?  How similar are each of these to the ATE?**
+
+```{r, echo = FALSE}
+
+ATT <- lm(SDO$TE ~ SDO$D)$coef[2] + lm(SDO$TE ~ SDO$D)$coef[1] 
+ATU <- lm(SDO$TE ~ SDO$D)$coef[1] %>% round(2)
+
+
+compar <- data.frame(Value = c(ATT,ATU),minusSDO=c(ATT-SDO.coef,ATU-SDO.coef),minusATE=c(ATT-average.TE$average.TE,ATU-average.TE$average.TE)) %>% round(2)
+rownames(compar) <- c("ATT","ATU")
+
+kableExtra::kbl(compar, caption = "f. Comparison with SDO and ATE") %>% 
+  kableExtra::kable_styling()
+
+```
+
+Both ATT and ATU are different than SDO and ATE. Notably, $ATT$ is at $-ATU$ distance from SDO, and $ATU$ is at $-ATT$ distance from SDO.  
+
+
+**g.	Show that the SDO is numerically equal to the sum of ATE, selection bias and heterogeneous treatment effects bias.  You will need to calculate the ATE, selection bias and heterogenous treatment effects bias, combine them in the appropriate way, and show that their sum is equivalent to the SDO.**
+
+
+The equation we're trying to verify is:
+
+$$ E[Y^1|D=1]-E[Y^0|D=0] = SDO = ATE + E[Y^0|D=1] - E[Y^0|D=0] + (1-\pi)(ATT-ATU)$$
+
+```{r include = FALSE}
+y0d1 <- lm(SDO$Y0 ~ SDO$D)$coef[2] + lm(SDO$Y0 ~ SDO$D)$coef[1] 
+y0d0 <- lm(SDO$Y0 ~ SDO$D)$coef[1] %>% round(2)
+
+average.TE$average.TE + y0d1-y0d0 + (1-4/11)*(ATT-ATU)
+
+```
+
+
+So we have that 
+$$ `r SDO.coef` = `r average.TE$average.TE` + (`r y0d1` - `r y0d0`) + (1-\frac{4}{11})(`r ATT`-`r ATU`) $$
+$$ `r SDO.coef` = `r average.TE$average.TE` + `r y0d1 - y0d0` + \frac{7}{11}(`r ATT - ATU`) $$
+$$ `r SDO.coef` = `r average.TE$average.TE + y0d1 - y0d0` + `r round(7/11*(ATT - ATU),2)` $$
+$$ `r SDO.coef` \approx `r (average.TE$average.TE + y0d1 - y0d0 + 7/11*(ATT - ATU)) %>% round(2)` $$
+
+-----
+
+***2.	Programming exercise version of #1***
+
+**a.	Create a dataset with 10,000 observations where Y1 and Y0 differ across the population.  Make the ATE equal to 10.** 
+
+```{r include = FALSE}
+# Y1.b <- Y0 + 10 
+# mean(Y1.b-Y0) #i rather have two different distributions
+```
+
+
+```{r}
+set.seed(1996)
+
+n <- 10000
+# Y1 <- rnorm(n,mean = 20,sd = 10)
+Y0 <- rnorm(n,mean = 10,sd = 10)
+Y1 <- 10 + Y0
+
+mean(Y1-Y0) # ATE is near 10
+
+```
+
+
+**b.	Use the perfect doctor example to assign treatment to each unit. Decompose the SDO, as we did before, into selection bias and weighted heterogenous treatment effect bias. **
+     *Hint: use randomization for Y1 and Y0 such that you have a treatment effet of 10 + Y0 for the Y1 variable.*
+
+```{r}
+# create data frame and assignment by perfect dr
+decomposition <- data.frame(Y1=Y1,Y0=Y0) %>% mutate(TE = Y1-Y0,
+                                                    D = as.numeric(Y1>Y0),
+                                                    Y = ifelse(D == 0, Y0, Y1))
+                                                  
+
+kableExtra::kbl(head(decomposition %>% round(2),15)) %>% kableExtra::kable_styling()
+
+```
+
+```{r}
+
+```
+
+     
+**c.	Show that E[Y1|D=1] = E[Y1|D=0].**  
+
+```{r}
+y1d1 <- lm(decomposition$Y1 ~ decomposition$D)$coef[2] + lm(decomposition$Y1 ~ decomposition$D)$coef[1]
+y1d0.f <- lm(decomposition$Y1 ~ decomposition$D)$coef[1]
+
+
+# no me salió
+
+```
+
+
+**d.	Show that E[Y0|D=1] = E[Y0|D=0].**
+
+```{r}
+
+y0d1.f <- lm(decomposition$Y0 ~ decomposition$D)$coef[2] + lm(decomposition$Y0 ~ decomposition$D)$coef[1]
+y0d0.f <- lm(decomposition$Y0 ~ decomposition$D)$coef[1]
+
+```
+
+
+**e.	So if that is the case in c and d, then why isn’t the case that E[Y1|D=1] = E[Y0|D=0]? What’s the different reasons for (a) vs (b) and (c)?**
+
+```{r}
+
+```
+
+
+
+
+**f.	Put in your own words what independence means.** 
+    *Recall: (Y1,Y0) _||_ D is the math formula for independence.* 
+ 
+
+
