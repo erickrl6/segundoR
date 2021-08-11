@@ -1294,8 +1294,8 @@ ATE2
 <p>Now it is easy to decompose:</p>
 <p><span class="math display">\[SDO = ATE + E[Y^0|D=1] - E[Y^0|D=0] + (1-\pi)(ATT-ATU)\]</span> <span class="math display">\[ 3.99 = 10.09 + 7.19-19.15+(0.24)(15.95--8.32) \]</span> <span class="math display">\[ 3.99 = 10.09 + -11.96+(0.24)(24.27) \]</span> <span class="math display">\[ 3.99 = -1.87+5.8248 \]</span> <span class="math display">\[ 3.99 \approx 3.9548 \]</span></p>
 <p><strong>c. Now use randomization for D to show independence</strong></p>
-<pre><code>## Warning in ensure_len_html(background, nrows, &quot;background&quot;): The number of
-## provided values in background does not equal to the number of rows.</code></pre>
+<pre class="r"><code>set.seed(1993)
+decomposition$D.rand &lt;- sample(x=c(1,0),size=n,replace=TRUE)</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <caption>
 Randomization of treatment
