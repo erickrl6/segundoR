@@ -176,179 +176,401 @@ pre code {
 <div id="potential-outcomes-selection-bias-and-the-perfect-doctor" class="section level3">
 <h3>Potential outcomes, selection bias and the perfect doctor</h3>
 <p><strong><em>1. Consider the simple hypothetical example in Table 1. This example involves eleven patients each of whom is infected with coronavirus. There are two treatments: ventilators and bedrest. Table 1 displays each patient’s potential outcomes in terms of years of post-treatment survival under each treatment. Larger outcome values correspond to better health outcomes.</em></strong></p>
-<table>
-<caption>Table 1</caption>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Table 1
+</caption>
 <thead>
-<tr class="header">
-<th align="right">Patient</th>
-<th align="right">Y1</th>
-<th align="right">Y0</th>
-<th align="right">Age</th>
+<tr>
+<th style="text-align:right;">
+Patient
+</th>
+<th style="text-align:right;">
+Y1
+</th>
+<th style="text-align:right;">
+Y0
+</th>
+<th style="text-align:right;">
+Age
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">10</td>
-<td align="right">29</td>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+29
+</td>
 </tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">5</td>
-<td align="right">35</td>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+35
+</td>
 </tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">19</td>
+<tr>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+19
+</td>
 </tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="right">5</td>
-<td align="right">6</td>
-<td align="right">45</td>
+<tr>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+45
+</td>
 </tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">1</td>
-<td align="right">65</td>
+<tr>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+65
+</td>
 </tr>
-<tr class="even">
-<td align="right">6</td>
-<td align="right">6</td>
-<td align="right">7</td>
-<td align="right">50</td>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+50
+</td>
 </tr>
-<tr class="odd">
-<td align="right">7</td>
-<td align="right">7</td>
-<td align="right">8</td>
-<td align="right">77</td>
+<tr>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+77
+</td>
 </tr>
-<tr class="even">
-<td align="right">8</td>
-<td align="right">7</td>
-<td align="right">10</td>
-<td align="right">18</td>
+<tr>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
 </tr>
-<tr class="odd">
-<td align="right">9</td>
-<td align="right">8</td>
-<td align="right">2</td>
-<td align="right">85</td>
+<tr>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+85
+</td>
 </tr>
-<tr class="even">
-<td align="right">10</td>
-<td align="right">9</td>
-<td align="right">6</td>
-<td align="right">96</td>
+<tr>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+96
+</td>
 </tr>
-<tr class="odd">
-<td align="right">11</td>
-<td align="right">10</td>
-<td align="right">7</td>
-<td align="right">77</td>
+<tr>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+77
+</td>
 </tr>
 </tbody>
 </table>
 <p><strong>a. Provide an example of how SUTVA might be violated for treatments of covid-19.</strong></p>
 <p>Stable unit treatment value assumption (SUTVA) requires that the potential outcome observation on one unit should be unaffected by the particular assignment of treatments to the other units. So, it has to be stable (everyone receives the same ‘dosage’, e.g. by unvarying quality of ventilators), without externalities (maybe if patients see that other patients get better they might also get better), and with an assumption of partial equilibrium (scale might be an issue causing problems to external validity).</p>
 <p><strong>b. Calculate each unit’s treatment effect (TE).</strong></p>
-<table>
-<caption>b. Treatment Effect</caption>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+<ol start="2" style="list-style-type: lower-alpha">
+<li>Treatment Effect
+</caption>
 <thead>
-<tr class="header">
-<th align="right">Patient</th>
-<th align="right">Y1</th>
-<th align="right">Y0</th>
-<th align="right">Age</th>
-<th align="right">TE</th>
+<tr>
+<th style="text-align:right;">
+Patient
+</th>
+<th style="text-align:right;">
+Y1
+</th>
+<th style="text-align:right;">
+Y0
+</th>
+<th style="text-align:right;">
+Age
+</th>
+<th style="text-align:right;">
+TE
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">10</td>
-<td align="right">29</td>
-<td align="right">-9</td>
+<tr>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+29
+</td>
+<td style="text-align:right;">
+-9
+</td>
 </tr>
-<tr class="even">
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">5</td>
-<td align="right">35</td>
-<td align="right">-4</td>
+<tr>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+35
+</td>
+<td style="text-align:right;">
+-4
+</td>
 </tr>
-<tr class="odd">
-<td align="right">3</td>
-<td align="right">1</td>
-<td align="right">4</td>
-<td align="right">19</td>
-<td align="right">-3</td>
+<tr>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+19
+</td>
+<td style="text-align:right;">
+-3
+</td>
 </tr>
-<tr class="even">
-<td align="right">4</td>
-<td align="right">5</td>
-<td align="right">6</td>
-<td align="right">45</td>
-<td align="right">-1</td>
+<tr>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+45
+</td>
+<td style="text-align:right;">
+-1
+</td>
 </tr>
-<tr class="odd">
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">1</td>
-<td align="right">65</td>
-<td align="right">4</td>
+<tr>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+65
+</td>
+<td style="text-align:right;">
+4
+</td>
 </tr>
-<tr class="even">
-<td align="right">6</td>
-<td align="right">6</td>
-<td align="right">7</td>
-<td align="right">50</td>
-<td align="right">-1</td>
+<tr>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+50
+</td>
+<td style="text-align:right;">
+-1
+</td>
 </tr>
-<tr class="odd">
-<td align="right">7</td>
-<td align="right">7</td>
-<td align="right">8</td>
-<td align="right">77</td>
-<td align="right">-1</td>
+<tr>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+-1
+</td>
 </tr>
-<tr class="even">
-<td align="right">8</td>
-<td align="right">7</td>
-<td align="right">10</td>
-<td align="right">18</td>
-<td align="right">-3</td>
+<tr>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+18
+</td>
+<td style="text-align:right;">
+-3
+</td>
 </tr>
-<tr class="odd">
-<td align="right">9</td>
-<td align="right">8</td>
-<td align="right">2</td>
-<td align="right">85</td>
-<td align="right">6</td>
+<tr>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+85
+</td>
+<td style="text-align:right;">
+6
+</td>
 </tr>
-<tr class="even">
-<td align="right">10</td>
-<td align="right">9</td>
-<td align="right">6</td>
-<td align="right">96</td>
-<td align="right">3</td>
+<tr>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+96
+</td>
+<td style="text-align:right;">
+3
+</td>
 </tr>
-<tr class="odd">
-<td align="right">11</td>
-<td align="right">10</td>
-<td align="right">7</td>
-<td align="right">77</td>
-<td align="right">3</td>
+<tr>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+3
+</td>
 </tr>
 </tbody>
-</table>
+</table></li>
+</ol>
 <p><strong>c. What is the average treatment effect for ventilators compared to bedrest? Which type of intervention is more effective on average?</strong></p>
 <p>The average treatment effect for ventilators is <strong>-0.55</strong>. It is a worse intervention on average, since it lowers health outcomes.</p>
 <p><strong>d. Suppose the “perfect doctor” knows each patient’s potential outcomes and as a result chooses the best treatment for each patient. If she assigns each patient to the treatment more beneficial for that patient, which patients will receive ventilators and which will receive bedrest? Fill in the remaining missing columns based on what the perfect doctor chooses.</strong></p>
@@ -705,20 +927,19 @@ ATU
 <pre class="r"><code>set.seed(1996)
 
 n &lt;- 10000
-# Y1 &lt;- rnorm(n,mean = 20,sd = 10)
+Y1 &lt;- rnorm(n,mean = 20,sd = 10)
 Y0 &lt;- rnorm(n,mean = 10,sd = 10)
-Y1 &lt;- 10 + Y0
 
 mean(Y1-Y0) # ATE is near 10</code></pre>
-<pre><code>## [1] 10</code></pre>
-<p><strong>b. Use the perfect doctor example to assign treatment to each unit. Decompose the SDO, as we did before, into selection bias and weighted heterogenous treatment effect bias. </strong> <em>Hint: use randomization for Y1 and Y0 such that you have a treatment effet of 10 + Y0 for the Y1 variable.</em></p>
+<pre><code>## [1] 10.08688</code></pre>
+<p><strong>b. Use the perfect doctor example to assign treatment to each unit. Decompose the SDO, as we did before, into selection bias and weighted heterogenous treatment effect bias. </strong> <em>Hint: use randomization for Y1 and Y0 such that you have a treatment effect of 10 + Y0 for the Y1 variable.</em></p>
 <pre class="r"><code># create data frame and assignment by perfect dr
 decomposition &lt;- data.frame(Y1=Y1,Y0=Y0) %&gt;% mutate(TE = Y1-Y0,
                                                     D = as.numeric(Y1&gt;Y0),
                                                     Y = ifelse(D == 0, Y0, Y1))
                                                   
 
-kableExtra::kbl(head(decomposition %&gt;% round(2),15)) %&gt;% kableExtra::kable_styling()</code></pre>
+kbl(head(decomposition %&gt;% round(2),15)) %&gt;% kable_styling()</code></pre>
 <table class="table" style="margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
@@ -745,10 +966,10 @@ Y
 25.54
 </td>
 <td style="text-align:right;">
-15.54
+-1.70
 </td>
 <td style="text-align:right;">
-10
+27.25
 </td>
 <td style="text-align:right;">
 1
@@ -762,16 +983,16 @@ Y
 5.87
 </td>
 <td style="text-align:right;">
--4.13
+27.58
 </td>
 <td style="text-align:right;">
-10
+-21.71
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
-5.87
+27.58
 </td>
 </tr>
 <tr>
@@ -779,10 +1000,10 @@ Y
 20.90
 </td>
 <td style="text-align:right;">
-10.90
+7.43
 </td>
 <td style="text-align:right;">
-10
+13.48
 </td>
 <td style="text-align:right;">
 1
@@ -796,10 +1017,10 @@ Y
 33.64
 </td>
 <td style="text-align:right;">
-23.64
+6.47
 </td>
 <td style="text-align:right;">
-10
+27.17
 </td>
 <td style="text-align:right;">
 1
@@ -813,10 +1034,10 @@ Y
 4.93
 </td>
 <td style="text-align:right;">
--5.07
+3.01
 </td>
 <td style="text-align:right;">
-10
+1.92
 </td>
 <td style="text-align:right;">
 1
@@ -830,10 +1051,10 @@ Y
 13.24
 </td>
 <td style="text-align:right;">
-3.24
+12.39
 </td>
 <td style="text-align:right;">
-10
+0.85
 </td>
 <td style="text-align:right;">
 1
@@ -847,10 +1068,10 @@ Y
 44.49
 </td>
 <td style="text-align:right;">
-34.49
+8.72
 </td>
 <td style="text-align:right;">
-10
+35.77
 </td>
 <td style="text-align:right;">
 1
@@ -864,10 +1085,10 @@ Y
 27.43
 </td>
 <td style="text-align:right;">
-17.43
+15.54
 </td>
 <td style="text-align:right;">
-10
+11.89
 </td>
 <td style="text-align:right;">
 1
@@ -881,10 +1102,10 @@ Y
 17.69
 </td>
 <td style="text-align:right;">
-7.69
+12.03
 </td>
 <td style="text-align:right;">
-10
+5.66
 </td>
 <td style="text-align:right;">
 1
@@ -898,10 +1119,10 @@ Y
 31.15
 </td>
 <td style="text-align:right;">
-21.15
+3.39
 </td>
 <td style="text-align:right;">
-10
+27.76
 </td>
 <td style="text-align:right;">
 1
@@ -915,10 +1136,10 @@ Y
 12.43
 </td>
 <td style="text-align:right;">
-2.43
+7.66
 </td>
 <td style="text-align:right;">
-10
+4.77
 </td>
 <td style="text-align:right;">
 1
@@ -932,10 +1153,10 @@ Y
 25.29
 </td>
 <td style="text-align:right;">
-15.29
+-5.10
 </td>
 <td style="text-align:right;">
-10
+30.39
 </td>
 <td style="text-align:right;">
 1
@@ -949,10 +1170,10 @@ Y
 29.18
 </td>
 <td style="text-align:right;">
-19.18
+18.99
 </td>
 <td style="text-align:right;">
-10
+10.19
 </td>
 <td style="text-align:right;">
 1
@@ -966,10 +1187,10 @@ Y
 18.82
 </td>
 <td style="text-align:right;">
-8.82
+7.32
 </td>
 <td style="text-align:right;">
-10
+11.51
 </td>
 <td style="text-align:right;">
 1
@@ -983,31 +1204,585 @@ Y
 6.06
 </td>
 <td style="text-align:right;">
--3.94
+14.32
 </td>
 <td style="text-align:right;">
-10
+-8.27
 </td>
 <td style="text-align:right;">
-1
+0
 </td>
 <td style="text-align:right;">
-6.06
+14.32
 </td>
 </tr>
 </tbody>
 </table>
-<p><strong>c. Show that E[Y1|D=1] = E[Y1|D=0].</strong></p>
-<pre class="r"><code>y1d1 &lt;- lm(decomposition$Y1 ~ decomposition$D)$coef[2] + lm(decomposition$Y1 ~ decomposition$D)$coef[1]
-y1d0.f &lt;- lm(decomposition$Y1 ~ decomposition$D)$coef[1]
+<pre class="r"><code># calculate SDO, ATE, and heterogeneous treatment effect
 
+decomp &lt;- decomposition %&gt;% summarize(SDO = (sum(D*Y)/sum(D))-(sum((1-D)*Y)/sum(1-D)),
+                            ATE = mean(TE),
+                            Y0lD1 = (sum(D*Y0)/sum(D)),
+                            Y0lD0 = (sum((1-D)*Y0)/sum(1-D)),
+                            one.minus.pi = sum(1-D)/n(),
+                            ATT = (sum(D*TE)/sum(D)),
+                            ATU = (sum((1-D)*TE)/sum(1-D)),
+                            ATE2 = ATT*(1-one.minus.pi)+ATU*(one.minus.pi)) %&gt;% round(2) # only for validation 
 
-# no me salió</code></pre>
-<p><strong>d. Show that E[Y0|D=1] = E[Y0|D=0].</strong></p>
-<pre class="r"><code>y0d1.f &lt;- lm(decomposition$Y0 ~ decomposition$D)$coef[2] + lm(decomposition$Y0 ~ decomposition$D)$coef[1]
-y0d0.f &lt;- lm(decomposition$Y0 ~ decomposition$D)$coef[1]</code></pre>
-<p><strong>e. So if that is the case in c and d, then why isn’t the case that E[Y1|D=1] = E[Y0|D=0]? What’s the different reasons for (a) vs (b) and (c)?</strong></p>
-<p><strong>f. Put in your own words what independence means.</strong> <em>Recall: (Y1,Y0) <em>||</em> D is the math formula for independence.</em></p>
+kbl(decomp,caption = &quot;All the ingredients we need to decompose SDO&quot;) %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+All the ingredients we need to decompose SDO
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+SDO
+</th>
+<th style="text-align:right;">
+ATE
+</th>
+<th style="text-align:right;">
+Y0lD1
+</th>
+<th style="text-align:right;">
+Y0lD0
+</th>
+<th style="text-align:right;">
+one.minus.pi
+</th>
+<th style="text-align:right;">
+ATT
+</th>
+<th style="text-align:right;">
+ATU
+</th>
+<th style="text-align:right;">
+ATE2
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+3.99
+</td>
+<td style="text-align:right;">
+10.09
+</td>
+<td style="text-align:right;">
+7.19
+</td>
+<td style="text-align:right;">
+19.15
+</td>
+<td style="text-align:right;">
+0.24
+</td>
+<td style="text-align:right;">
+15.95
+</td>
+<td style="text-align:right;">
+-8.32
+</td>
+<td style="text-align:right;">
+10.09
+</td>
+</tr>
+</tbody>
+</table>
+<p>Now it is easy to decompose:</p>
+<p><span class="math display">\[SDO = ATE + E[Y^0|D=1] - E[Y^0|D=0] + (1-\pi)(ATT-ATU)\]</span> <span class="math display">\[ 3.99 = 10.09 + 7.19-19.15+(0.24)(15.95--8.32) \]</span> <span class="math display">\[ 3.99 = 10.09 + -11.96+(0.24)(24.27) \]</span> <span class="math display">\[ 3.99 = -1.87+5.8248 \]</span> <span class="math display">\[ 3.99 \approx 3.9548 \]</span></p>
+<p><strong>c. Now use randomization for D to show independence</strong></p>
+<pre><code>## Warning in ensure_len_html(background, nrows, &quot;background&quot;): The number of
+## provided values in background does not equal to the number of rows.</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Randomization of treatment
+</caption>
+<thead>
+<tr>
+<th style="text-align:right;">
+Y1
+</th>
+<th style="text-align:right;">
+Y0
+</th>
+<th style="text-align:right;">
+TE
+</th>
+<th style="text-align:right;">
+D
+</th>
+<th style="text-align:right;">
+Y
+</th>
+<th style="text-align:right;">
+D.rand
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+25.54
+</td>
+<td style="text-align:right;">
+-1.70
+</td>
+<td style="text-align:right;">
+27.25
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+25.54
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+5.87
+</td>
+<td style="text-align:right;">
+27.58
+</td>
+<td style="text-align:right;">
+-21.71
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+27.58
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+20.90
+</td>
+<td style="text-align:right;">
+7.43
+</td>
+<td style="text-align:right;">
+13.48
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+20.90
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+33.64
+</td>
+<td style="text-align:right;">
+6.47
+</td>
+<td style="text-align:right;">
+27.17
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+33.64
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+4.93
+</td>
+<td style="text-align:right;">
+3.01
+</td>
+<td style="text-align:right;">
+1.92
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+4.93
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+13.24
+</td>
+<td style="text-align:right;">
+12.39
+</td>
+<td style="text-align:right;">
+0.85
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+13.24
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+44.49
+</td>
+<td style="text-align:right;">
+8.72
+</td>
+<td style="text-align:right;">
+35.77
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+44.49
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+27.43
+</td>
+<td style="text-align:right;">
+15.54
+</td>
+<td style="text-align:right;">
+11.89
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+27.43
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+17.69
+</td>
+<td style="text-align:right;">
+12.03
+</td>
+<td style="text-align:right;">
+5.66
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+17.69
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+31.15
+</td>
+<td style="text-align:right;">
+3.39
+</td>
+<td style="text-align:right;">
+27.76
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+31.15
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+12.43
+</td>
+<td style="text-align:right;">
+7.66
+</td>
+<td style="text-align:right;">
+4.77
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+12.43
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+25.29
+</td>
+<td style="text-align:right;">
+-5.10
+</td>
+<td style="text-align:right;">
+30.39
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+25.29
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+29.18
+</td>
+<td style="text-align:right;">
+18.99
+</td>
+<td style="text-align:right;">
+10.19
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+29.18
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+18.82
+</td>
+<td style="text-align:right;">
+7.32
+</td>
+<td style="text-align:right;">
+11.51
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+18.82
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+6.06
+</td>
+<td style="text-align:right;">
+14.32
+</td>
+<td style="text-align:right;">
+-8.27
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14.32
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+24.03
+</td>
+<td style="text-align:right;">
+-2.17
+</td>
+<td style="text-align:right;">
+26.20
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+24.03
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+12.85
+</td>
+<td style="text-align:right;">
+17.01
+</td>
+<td style="text-align:right;">
+-4.16
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+17.01
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+17.47
+</td>
+<td style="text-align:right;">
+3.10
+</td>
+<td style="text-align:right;">
+14.38
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+17.47
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+16.51
+</td>
+<td style="text-align:right;">
+18.42
+</td>
+<td style="text-align:right;">
+-1.91
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+18.42
+</td>
+<td style="text-align:right;color: white !important;background-color: green !important;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:right;">
+19.86
+</td>
+<td style="text-align:right;">
+-3.74
+</td>
+<td style="text-align:right;">
+23.60
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+19.86
+</td>
+<td style="text-align:right;color: white !important;background-color: red !important;">
+0
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>d. Show that E[Y1|D=1] = E[Y1|D=0].</strong></p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Y1lD1
+</th>
+<th style="text-align:right;">
+Y1lD0
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:right;">
+19.91
+</td>
+<td style="text-align:right;">
+20.42
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>e. Show that E[Y0|D=1] = E[Y0|D=0].</strong></p>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Y0lD1
+</th>
+<th style="text-align:right;">
+Y0lD0
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+</td>
+<td style="text-align:right;">
+9.96
+</td>
+<td style="text-align:right;">
+10.19
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>f. So if that is the case in c and d, then why isn’t the case that E[Y1|D=1] = E[Y0|D=0]? What’s the different reasons for (a) vs (b) and (c)?</strong></p>
+<p>In fact, <span class="math inline">\(E[Y^1|D=1] \neq E[Y^1|D=1]\)</span> because <span class="math inline">\(19.91 \neq 10.19\)</span>. This is because, while independence implies that there is no selection bias, and then both <span class="math inline">\(E[Y^0|D=1] = E[Y^0|D=0]\)</span> and <span class="math inline">\(E[Y^1|D=1] = E[Y^1|D=0]\)</span> are true (as verified in the last two exercises), this doesn’t mean that potential outcomes in the treated group vs the non-treated one cannot differ, since we are comparing different treatment universes. They will only be equal if the SDO is 0, too.</p>
+<p><strong>g. Put in your own words what independence means.</strong> <em>Recall: (Y1,Y0) <em>||</em> D is the math formula for independence.</em></p>
+<p>Random assignment means the treatment has been assigned to units without regard to their potential outcomes. This ensures that mean potential outcomes for the treatment group and control group are the same.</p>
 </div>
 
 

@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(kableExtra)
 ```
 
 ### Potential outcomes, selection bias and the perfect doctor
@@ -30,7 +31,8 @@ tabla1 <- tibble::tribble(
        11L, 10L,  7L,  77L,  NA, NA, NA
   )
 
-knitr::kable(tabla1 %>% select(-(TE:Y)), caption = "Table 1")
+kbl(tabla1 %>% select(-(TE:Y)), caption = "Table 1") %>% 
+  kable_styling()
 
 ```
 
@@ -43,7 +45,8 @@ Stable unit treatment value assumption (SUTVA) requires that the potential outco
 ```{r, echo=FALSE, results='asis'}
 tabla.te <- tabla1 %>% mutate(TE= Y1-Y0)
 
-knitr::kable(tabla.te %>% select(-D,-Y), caption = "b. Treatment Effect")
+kbl(tabla.te %>% select(-D,-Y), caption = "b. Treatment Effect") %>% 
+  kable_styling()
 
 ```
 
@@ -64,9 +67,9 @@ The average treatment effect for ventilators is **`r average.TE$average.TE`**. I
 ```{r, echo=FALSE}
 tabla.phd <- tabla.te %>% mutate(D = as.numeric(Y1>Y0),Y = ifelse(D == 0, Y0,Y1))
 
-kableExtra::kbl(tabla.phd, caption = "d. The Perfect Doctor arrives") %>% 
-  kableExtra::kable_styling() %>% 
-  kableExtra::column_spec(6, background = ifelse(tabla.phd$D ==1, "green", "red"),color = "white")
+kbl(tabla.phd, caption = "d. The Perfect Doctor arrives") %>% 
+  kable_styling() %>% 
+  column_spec(6, background = ifelse(tabla.phd$D ==1, "green", "red"),color = "white")
 
 
 ```
@@ -98,8 +101,8 @@ ATU <- lm(SDO$TE ~ SDO$D)$coef[1] %>% round(2)
 compar <- data.frame(Value = c(ATT,ATU),minusSDO=c(ATT-SDO.coef,ATU-SDO.coef),minusATE=c(ATT-average.TE$average.TE,ATU-average.TE$average.TE)) %>% round(2)
 rownames(compar) <- c("ATT","ATU")
 
-kableExtra::kbl(compar, caption = "f. Comparison with SDO and ATE") %>% 
-  kableExtra::kable_styling()
+kbl(compar, caption = "f. Comparison with SDO and ATE") %>% 
+  kable_styling()
 
 ```
 
@@ -144,9 +147,8 @@ $$ `r SDO.coef` \approx `r (average.TE$average.TE + y0d1 - y0d0 + 7/11*(ATT - AT
 set.seed(1996)
 
 n <- 10000
-# Y1 <- rnorm(n,mean = 20,sd = 10)
+Y1 <- rnorm(n,mean = 20,sd = 10)
 Y0 <- rnorm(n,mean = 10,sd = 10)
-Y1 <- 10 + Y0
 
 mean(Y1-Y0) # ATE is near 10
 
@@ -154,7 +156,7 @@ mean(Y1-Y0) # ATE is near 10
 
 
 **b.	Use the perfect doctor example to assign treatment to each unit. Decompose the SDO, as we did before, into selection bias and weighted heterogenous treatment effect bias. **
-     *Hint: use randomization for Y1 and Y0 such that you have a treatment effet of 10 + Y0 for the Y1 variable.*
+     *Hint: use randomization for Y1 and Y0 such that you have a treatment effect of 10 + Y0 for the Y1 variable.*
 
 ```{r}
 # create data frame and assignment by perfect dr
@@ -163,48 +165,89 @@ decomposition <- data.frame(Y1=Y1,Y0=Y0) %>% mutate(TE = Y1-Y0,
                                                     Y = ifelse(D == 0, Y0, Y1))
                                                   
 
-kableExtra::kbl(head(decomposition %>% round(2),15)) %>% kableExtra::kable_styling()
+kbl(head(decomposition %>% round(2),15)) %>% kable_styling()
 
 ```
 
 ```{r}
+# calculate SDO, ATE, and heterogeneous treatment effect
+
+decomp <- decomposition %>% summarize(SDO = (sum(D*Y)/sum(D))-(sum((1-D)*Y)/sum(1-D)),
+                            ATE = mean(TE),
+                            Y0lD1 = (sum(D*Y0)/sum(D)),
+                            Y0lD0 = (sum((1-D)*Y0)/sum(1-D)),
+                            one.minus.pi = sum(1-D)/n(),
+                            ATT = (sum(D*TE)/sum(D)),
+                            ATU = (sum((1-D)*TE)/sum(1-D)),
+                            ATE2 = ATT*(1-one.minus.pi)+ATU*(one.minus.pi)) %>% round(2) # only for validation 
+
+kbl(decomp,caption = "All the ingredients we need to decompose SDO") %>% kable_styling()
+
+```
+
+Now it is easy to decompose:
+
+$$SDO = ATE + E[Y^0|D=1] - E[Y^0|D=0] + (1-\pi)(ATT-ATU)$$
+$$ `r decomp[1]` = `r decomp[2]` + `r decomp[3]`-`r decomp[4]`+(`r decomp[5]`)(`r decomp[6]`-`r decomp[7]`) $$
+$$ `r decomp[1]` = `r decomp[2]` + `r decomp[3]- decomp[4]`+(`r decomp[5]`)(`r decomp[6] - decomp[7]`) $$
+$$ `r decomp[1]` = `r decomp[2] + decomp[3]- decomp[4]`+`r (decomp[5])*(decomp[6] - decomp[7])` $$
+$$ `r decomp[1]` \approx `r decomp[2] + decomp[3]- decomp[4] + (decomp[5])*(decomp[6] - decomp[7])` $$
+
+**c.	Now use randomization for D to show independence**
+
+```{r, echo = FALSE}
+decomposition$D.rand <-  sample(x=c(1,0),size=n,replace=TRUE)
+
+kbl(decomposition %>% head(20) %>% round(2), caption = "Randomization of treatment") %>% 
+  kable_styling() %>% 
+  column_spec(6, background = ifelse(decomposition$D.rand ==1, "green", "red"),color = "white")
+
 
 ```
 
      
-**c.	Show that E[Y1|D=1] = E[Y1|D=0].**  
+**d.	Show that E[Y1|D=1] = E[Y1|D=0].**  
 
-```{r}
-y1d1 <- lm(decomposition$Y1 ~ decomposition$D)$coef[2] + lm(decomposition$Y1 ~ decomposition$D)$coef[1]
-y1d0.f <- lm(decomposition$Y1 ~ decomposition$D)$coef[1]
+```{r, echo = FALSE}
+y1d1.f <- lm(decomposition$Y1 ~ decomposition$D.rand)$coef[2] + lm(decomposition$Y1 ~ decomposition$D.rand)$coef[1] 
+y1d0.f <- lm(decomposition$Y1 ~ decomposition$D.rand)$coef[1] 
 
+a <- data.frame(Y1lD1=y1d1.f,Y1lD0=y1d0.f) %>% round(2)
+rownames(a) <- ""
 
-# no me salió
+kbl(a) %>% kable_styling()
 
-```
-
-
-**d.	Show that E[Y0|D=1] = E[Y0|D=0].**
-
-```{r}
-
-y0d1.f <- lm(decomposition$Y0 ~ decomposition$D)$coef[2] + lm(decomposition$Y0 ~ decomposition$D)$coef[1]
-y0d0.f <- lm(decomposition$Y0 ~ decomposition$D)$coef[1]
+# close enough
 
 ```
 
 
-**e.	So if that is the case in c and d, then why isn’t the case that E[Y1|D=1] = E[Y0|D=0]? What’s the different reasons for (a) vs (b) and (c)?**
+**e.	Show that E[Y0|D=1] = E[Y0|D=0].**
 
-```{r}
+```{r, echo = FALSE}
+
+y0d1.f <- lm(decomposition$Y0 ~ decomposition$D.rand)$coef[2] + lm(decomposition$Y0 ~ decomposition$D.rand)$coef[1]
+y0d0.f <- lm(decomposition$Y0 ~ decomposition$D.rand)$coef[1]
+
+a <- data.frame(Y0lD1=y0d1.f,Y0lD0=y0d0.f) %>% round(2)
+rownames(a) <- ""
+
+kbl(a) %>% kable_styling()
+
+# close enough
 
 ```
 
 
+**f.	So if that is the case in c and d, then why isn’t the case that E[Y1|D=1] = E[Y0|D=0]? What’s the different reasons for (a) vs (b) and (c)?**
+
+In fact, $E[Y^1|D=1] \neq E[Y^1|D=1]$ because $`r round(y1d1.f,2)` \neq `r round(y0d0.f,2)`$. This is because, while independence implies that there is no selection bias, and then both $E[Y^0|D=1] = E[Y^0|D=0]$ and $E[Y^1|D=1] = E[Y^1|D=0]$ are true (as verified in the last two exercises), this doesn't mean that potential outcomes in the treated group vs the non-treated one cannot differ, since we are comparing different treatment universes. They will only be equal if the SDO is 0, too.  
 
 
-**f.	Put in your own words what independence means.** 
+**g.	Put in your own words what independence means.** 
     *Recall: (Y1,Y0) _||_ D is the math formula for independence.* 
- 
+
+Random assignment means the treatment has been assigned to units without regard to their potential outcomes. This ensures that mean potential outcomes for the treatment group and control group are the same. 
+
 
 
