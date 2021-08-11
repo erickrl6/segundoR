@@ -196,6 +196,7 @@ $$ `r decomp[1]` \approx `r decomp[2] + decomp[3]- decomp[4] + (decomp[5])*(deco
 **c.	Now use randomization for D to show independence**
 
 ```{r, echo = FALSE}
+set.seed(1993)
 decomposition$D.rand <-  sample(x=c(1,0),size=n,replace=TRUE)
 
 kbl(decomposition %>% head(20) %>% round(2), caption = "Randomization of treatment") %>% 
