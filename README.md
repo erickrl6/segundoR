@@ -1,3 +1,3 @@
 # segundoR
 
-This is my Assignment 2. Feel free to download it if that helps!
+This is the repository in which I'll put my assignments for the causal inference class. Feel free to download it if that helps!
