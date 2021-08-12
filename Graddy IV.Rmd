@@ -1,0 +1,54 @@
+---
+title: "Graddy IV"
+author: "Erick Rosas"
+date: "12/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Fish Markets and Instrumental Variables (Work in *Slow* Progress)
+
+For this problem, use the dataset “fish.dta”. The data was used in Graddy (1995) and Angrist, Graddy and Imbens (2000). It was obtained from a single dealer of whiting at the Fulton fish market.  He supplied his inventory sheets for the period of December 1991 through May 1992.The market is open Monday through Friday.  Make beautiful tables and beautiful figures if you can.
+
+```{r warning=FALSE,message=FALSE}
+library(foreign)
+library(tidyverse)
+library(stargazer)
+
+fish <- read.dta("https://github.com/scunning1975/causal-inference-class/blob/master/Assignments/Assignments/FISH.dta?raw=true")
+```
+
+**Consider the following demand equation:**
+
+$$Quantity_t=β_0+β_1 Price_t+β_2 mon_t+ β_3 tue_t+ β_4 Wed_t+β_5 Thurs_t+β_6 Time_t+ ε_t$$
+
+**Run this regression using ordinary least squares with the command “reg” and report the estimated coefficient, standard error, and p-value on price.  Interpret the coefficient on price.  Why would we be concerned that the estimated coefficient on price is not a consistent estimate of the causal effect of price on the demand for whiting?**
+
+```{r reg, results='asis'}
+
+ols <- lm(quantity ~ .,fish %>% select(-(speed2:wave3)))
+stargazer(ols,type="html",omit = c("Constant","mon","tues","wed","thurs","time"))
+
+```
+
+
+
+
+**Why would we want to include day of the week indicators in the regression?  Why would we want to include a time trend in the regression?**
+
+**Consider using wave2, the average over the past two days of the observed maximum wave height for the day, as an instrument for the price of whiting.  Explain why this might be a valid instrument.  Why is this “strange”?**
+
+**Run the first stage regression using ordinary least squares (OLS):**
+
+$$Price_t= α_0+ α_1 wave2_t+ α_3 mon_t+ α_4 tue_t+α_5 wed_t+ α_6 thurs_t+ α_7 time_t+ ω_t$$
+
+Is wave2 a strong instrument?  What is the F statistic on the excludability of the instrument from the first stage?
+	Report the IV estimate of the effect of price on quantity using wave2 as an instrumental variable.  How does this compare to the OLS estimate of the association between price and quantity? (is it the same, larger, smaller?).  Provide an intuitive explanation of why your OLS estimate is different from your IV estimate.
+	Report the estimated own-price demand elasticity of whiting using wave2 as the instrument.
+	Consider using speed3, the maximum wind speed from three days earlier, as the instrument for price instead of wave2.  Using only speed3 run the 1st-stage regression.  Is speed3 a strong instrument (using the F-test)?
+	Summarize this exercise in a professional-looking table like the one I shared in dropbox with all the same columns and rows, labeled correctly, but using the two different instruments (wave2 in column 2 and speed3 in column 3). 
+	Discuss why your IV estimates in columns (2) and (3) differed from one another.  How does this shed light on our discussion of the local average treatment effect (LATE) parameter?
+
