@@ -1,0 +1,227 @@
+---
+title: "Hansen RDD"
+author: "Erick Rosas"
+date: "11/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+**1. Download Hansen_dwi.dta from github**
+
+```{r warning=FALSE,message=FALSE}
+library(tidyverse)
+library(rddensity)
+library(rdd)
+library(rdrobust)
+library(stargazer)
+library(estimatr)
+
+data <- read.csv("https://raw.githubusercontent.com/scunning1975/causal-inference-class/master/Data/hansen_dwi.csv")
+
+summary(data)
+```
+
+The outcome variable is “recidivism” or “recid” which is measuring whether the person showed back up in the data within 4 months. 
+
+### Reproducing somewhat Hansen’s results (but just follow directions) 
+
+**2.	In the United States, an officer can arrest a driver if after giving them a blood alcohol content (BAC) test they learn the driver had a BAC of 0.08 or higher.  We will only focus on the 0.08 BAC cutoff. We will be ignoring the 0.15 cutoff for all this analysis. Create a dummy equaling 1 if bac1>= 0.08 and 0 otherwise in your do file or R file**
+
+```{r dummy}
+data$arrest <- as.numeric(data$bac1>=0.08)
+
+data %>% count(arrest)
+
+```
+
+**3.	The first thing to do in any RDD is look at the raw data and see if there’s any evidence for manipulation (“sorting on the running variable”).  If people were capable of manipulating their blood alcohol content (bac1), describe the test we would use to check for this.  Now evaluate whether you see this in these data?  Either recreate Figure 1 using the bac1 variable as your measure of blood alcohol content or use your own density test from software.  Do you find evidence for sorting on the running variable? Explain your results.  Compare what you found to what Hansen found**
+
+```{r bunching}
+data %>% 
+  ggplot()+
+  geom_bar(aes(bac1),fill="gray",width = 0.001)+
+  geom_vline(aes(xintercept=0.08),color="red")+
+  theme_bw()
+```
+
+According to Hansen (p.1587): 
+
+    Indeed, the distribution of BAC shows little evidence of endogenous sorting 
+    to one side of either of the thresholds studied.
+    
+I'll apply the manipulation testing using local polynomial density estimation found in the package `rddensity`, developed by Cattaneo, Jannson and Ma (2020). The objective is to test formally whether the density of the running variable is continuous at the cutoff, thus the null and alternative hypothesis (with the cutoff in $\bar{x}$) are:
+
+$$\mathrm{H}_{0}: \lim _{x \uparrow \bar{x}} f(x)=\lim _{x \downarrow \bar{x}} f(x) \quad \text { vs } \quad \mathrm{H}_{1}: \lim _{x \uparrow \bar{x}} f(x) \neq \lim _{x \downarrow \bar{x}} f(x)$$
+
+```{r manipulation, warning=FALSE}
+rdd <- rddensity(X=data$bac1,c=0.08)
+summary(rdd)
+
+plot <- rdplotdensity(rdd, data$bac1, plotRange = c(0, 0.4), plotN = 25)
+```
+
+As we can see, the null fails to be rejected, since the p-value is `r rdd$test$p_jk %>% round(2)`. 
+
+**4.	The second thing we need to do is check for covariate balance.  Recreate Table 2 Panel A but only white male, age and accident (acc) as dependent variables.  Use your equation 1) for this. Are the covariates balanced at the cutoff?  It’s okay if they are not exactly the same as Hansen’s.**
+
+Equation 1 below describes the specification for a local linear regression discontinuity design to estimate the effect of having a BAC above the DUI threshold (0.08 in our case) on recidivism:
+
+$$y_{i}=X_{i}^{\prime} \gamma+\alpha_{1} D U I_{i}+\alpha_{2} B A C_{i}+\alpha_{3} B A C_{i} \times D U I_{i}+u_{i}$$
+
+Where $X_{i}^{\prime}$ is a vector of controls, $DUI$ is a dummy variable indicating whether the threshold is surpassed, $BAC$ is Blood Alcohol Content and $y_{i}$ is our variable of interest. Hansen uses a rectangular kernel. The BAC variable is rescaled around 0.08, and standard errors adjust for heteroskedasticity. All regressions have a bandwidth of 0.05 and use a rectangular kernel for weighting.
+
+The results can be seen in the following table:
+    
+```{r Table 2 Panel A}
+data$bac1.centered <- data$bac1-0.08
+# el cutoff ahora es 0!
+rdtable2 <- function(var) temp <- rdrobust(var,data$bac1.centered,c=0,h=0.05,kernel="uniform",masspoints = "off")
+  
+male <- rdtable2(data$male)
+white <-rdtable2(data$white)
+age <- rdtable2(data$age)
+accident <- rdtable2(data$acc)
+
+models <- list(male,white,age,accident)
+names(models) <- c("male","white","age","accident")
+
+tidy.rdrobust <- function(model, ...) {
+  ret <- data.frame(
+    term = row.names(model$coef)[1],
+    estimate = model$coef[1, 1],
+    std.error = model$se[1, 1],
+    p.value = model$pv[1, 1]
+  )
+  row.names(ret) <- NULL
+  ret #mean a 0.079
+}
+
+glance.rdrobust <- function(model, ...) {
+  ret <- data.frame(
+    # `Mean at 0.079` = "3", # how to estimate it?
+    Kernel = model$kernel,
+    Bandwidth = paste(model$bwselect,"=",model$bws[1]),
+    Observations = as.character(model$N_h[1]+model$N_h[2])
+  )
+  ret
+}
+
+modelsummary::modelsummary(models,statistic = c("std.error","p.value"))
+```
+
+None of them are significant, since the p-values are bigger than 0.05. I fail to reject the null that these characteristics are unrelated to the BAC cutoffs for DUI. So covariates are balanced. 
+
+
+**5.	Recreate Figure 2 panel A-D. You can use the -cmogram- command in Stata to do this (or another method).  Fit both linear and quadratic with confidence intervals. Discuss what you find and compare it with Hansen’s paper.**
+
+***With quadratic fit***
+
+```{r Figure 2 Panel A-D, fig.show='hide'}
+rdplot2 <- function(var) temp <- rdplot(var,data$bac1,c=0.08,h=0.05,masspoints = "off",p=2,ci=TRUE) #one quadratic, one linear
+
+custom <- function(var,name){
+  temp <- rdplot2(var)
+  temp$rdplot +
+    labs(title = name) +
+    scale_x_continuous(limits = c(0,0.25))+
+    xlab("BAC")+
+    ylab("")
+} 
+
+fig2 <- cowplot::plot_grid(custom(data$male,"Male"),
+                   custom(data$white,"White"),
+                   custom(data$age,"Age"),
+                   custom(data$acc,"Accident"))
+```
+
+
+```{r Figure 2 Panel A-D2, echo=FALSE}
+fig2
+```
+
+
+***With linear fit***
+
+```{r Figure 2 Panel A-D3, fig.show='hide'}
+rdplot2 <- function(var) temp <- rdplot(var,data$bac1,c=0.08,h=0.05,masspoints = "off",p=1,ci=TRUE) #one quadratic, one linear
+
+custom <- function(var,name){
+  temp <- rdplot2(var)
+  temp$rdplot +
+    labs(title = name) +
+    scale_x_continuous(limits = c(0,0.25))+
+    xlab("BAC")+
+    ylab("")
+} 
+
+fig2.2 <- cowplot::plot_grid(custom(data$male,"Male"),
+                   custom(data$white,"White"),
+                   custom(data$age,"Age"),
+                   custom(data$acc,"Accident"))
+```
+
+
+```{r Figure 2 Panel A-D4, echo=FALSE}
+fig2.2
+```
+
+Fitting linear local regressions in this case could probably find treatment effects where there aren't, as we can see in the image with the quadratic fit, covariates seem balanced/smooth. The same is true with the linear ones, although the fit isn't as smooth. I obtain more or less the same results as the author.
+
+**6.	Estimate equation (1) with recidivism (recid) as the outcome.  This corresponds to Table 3 column 1, but since I am missing some of his variables, your sample size will be the entire dataset of 214,558.  Nevertheless, replicate Table 3, column 1, Panels A and B.  Note that these are local linear regressions and Panel A uses as its bandwidth 0.03 to 0.13.  But Panel B has a narrower bandwidth of 0.055 to 0.105.  Your table should have three columns and two A and B panels associated with the different bandwidths.:**
+
+*-a.	Column 1: control for the bac1 linearly*
+*-b.	Column 2: interact bac1 with cutoff linearly*
+*-c.	Column 3: interact bac1 with cutoff linearly and as a quadratic*
+*-d.	For all analysis, estimate uncertainty using heteroskedastic robust standard errors.  [ed: But if you want to show off, use Kolesár and Rothe’s 2018 “honest” confidence intervals (only available in R).]* 
+
+***Replication using rdrobust with covariates (except county(***
+
+```{r recidivism rdrobust}
+rdtable3 <- function(var,x,bw) temp <- rdrobust(var,x,c=0,h=bw,kernel="uniform",masspoints = "off")
+
+panel.a <- data %>% filter(bac1>=0.03,bac1<=0.13)
+panel.b <- data %>% filter(bac1>=0.055,bac1<=0.105)
+
+# recid.a <- rdtable3(panel.a$recidivism,panel.a$bac1.centered,0.05)
+# recid.b <- rdtable3(panel.b$recidivism,panel.b$bac1.centered,0.025)
+# 
+# summary(recid.a)
+# summary(recid.b)
+
+# Controls include indicators for county, year, race, gender, and age of the offender. 
+rdtable3.covariates <- function(df,bw){
+  temp <- rdrobust(df$recidivism,df$bac1.centered,c=0,h=bw,kernel="uniform",masspoints = "off",
+                   covs = df %>% select(year,white,male,aged)) 
+} 
+
+recid.aX <- rdtable3.covariates(panel.a,0.05)
+recid.bX <- rdtable3.covariates(panel.b,0.025) 
+
+# summary(recid.aX)
+# summary(recid.bX)
+
+models.recid <- list(recid.aX,recid.bX)
+names(models.recid) <- c("Panel A: BAC in [0.03, 0.13]","Panel B. BAC in [0.055, 0.105]")
+
+modelsummary::modelsummary(models.recid,statistic = c("std.error","p.value"))
+```
+
+```{r recidvism lm_robust}
+# estimatr::lm_robust()
+# with Honest
+# remotes::install_github("kolesarm/RDHonest")
+RDHonest::
+  
+  
+```
+
+
+**7.	Recreate the top panel of Figure 3 according to the following rule:** 
+*-a.	Fit linear fit using only observations with less than 0.15 bac on the bac1*
+*-b.	Fit quadratic fit using only observations with less than 0.15 bac on the bac1*
+
+**8.	Discuss what you learned from this exercise.  What was the hypothesis you tested and what did you find?  How confident are you in Hansen’s original conclusion? Why/why not?**
+
