@@ -172,7 +172,7 @@ The estimate of $speed3$ is significant. However, the F-statistic is below 10, s
 ```{r, results='asis'}
 # iv.manual.ln <- lm(I(log(quantity)) ~ .,fish %>% mutate(ln.fitted=log(fitted)) %>% select(-(speed2:wave3),-price,-fitted))
 
-iv.ln2 <- ivreg(formula=I(log(quantity)) ~ I(log(price))+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+speed3,data=fish)
+iv.ln2 <- ivreg(formula=I(log(quantity)) ~  I(log(price))+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+speed3,data=fish)
 
 stargazer(ols.ln,iv.ln,iv.ln2,
           type="html",
