@@ -17,6 +17,9 @@ For this problem, use the dataset “fish.dta”. The data was used in Graddy (1
 library(foreign)
 library(tidyverse)
 library(stargazer)
+library(kableExtra)
+library(lfe)
+library(ivreg)
 
 fish <- read.dta("https://github.com/scunning1975/causal-inference-class/blob/master/Assignments/Assignments/FISH.dta?raw=true")
 ```
@@ -27,28 +30,100 @@ $$Quantity_t=β_0+β_1 Price_t+β_2 mon_t+ β_3 tue_t+ β_4 Wed_t+β_5 Thurs_t+�
 
 **Run this regression using ordinary least squares with the command “reg” and report the estimated coefficient, standard error, and p-value on price.  Interpret the coefficient on price.  Why would we be concerned that the estimated coefficient on price is not a consistent estimate of the causal effect of price on the demand for whiting?**
 
-```{r reg, results='asis'}
-
+```{r reg, results='asis',}
 ols <- lm(quantity ~ .,fish %>% select(-(speed2:wave3)))
-stargazer(ols,type="html",omit = c("Constant","mon","tues","wed","thurs","time"))
-
+stargazer(ols,type="html",omit = c("Constant","mon","tues","wed","thurs","time"),dep.var.caption = "")
+# modelsummary::modelsummary(ols)
 ```
 
+The regression results show a value of `r ols$coefficients[2]` on the price regressor. That means that the law of Marshall is observed, since an increase of 1 dollar in price induces a quantity change of `r ols$coefficients[2]` tons of whiting. 
 
-
+This estimate might not be causal because of the identification problem: Price and quantity are simultaneously determined in equilibria, so we'd need exogenous variation (supply shocks) to determine correctly our $\beta_1$.
 
 **Why would we want to include day of the week indicators in the regression?  Why would we want to include a time trend in the regression?**
 
+This is to capture intraweekly and seasonal variations that may confound the relationship between quantity and price (e.g. with days of more intensive activity in the market and days with less; or variations in price as time passes). This is illustrated in the following two graphs.
+
+```{r, message=FALSE}
+fish %>% 
+  pivot_longer(mon:thurs,names_to = "day") %>% filter(value==1) %>% 
+  ggplot(aes(x=price,y=quantity)) + 
+  geom_point() + 
+  geom_smooth(method="lm")+
+  facet_wrap(~day)+
+  theme_minimal()
+```
+
+
+```{r, message=FALSE}
+fish %>% 
+  ggplot(aes(x=time,y=price)) + 
+  geom_point() + 
+  geom_smooth()+
+  theme_minimal()
+```
+
 **Consider using wave2, the average over the past two days of the observed maximum wave height for the day, as an instrument for the price of whiting.  Explain why this might be a valid instrument.  Why is this “strange”?**
+
+Weather information such as wave height might constitute an exogenous variation on supply, affecting fishers and thus the price they sell at in the Fulton market. The *strangeness* of such an instrument derives in that demand is *not* affected by the weather: I still want to eat fish, independently if I waves are high or low.
+
+However, if there were close substitutes to whiting, Such an instrument might violate the exclusion restriction, because of general ewquilibrium effects that might end up affecting the quantity demanded through weather shocks.That doesn't seem to be the case here. 
+
 
 **Run the first stage regression using ordinary least squares (OLS):**
 
 $$Price_t= α_0+ α_1 wave2_t+ α_3 mon_t+ α_4 tue_t+α_5 wed_t+ α_6 thurs_t+ α_7 time_t+ ω_t$$
 
-Is wave2 a strong instrument?  What is the F statistic on the excludability of the instrument from the first stage?
-	Report the IV estimate of the effect of price on quantity using wave2 as an instrumental variable.  How does this compare to the OLS estimate of the association between price and quantity? (is it the same, larger, smaller?).  Provide an intuitive explanation of why your OLS estimate is different from your IV estimate.
-	Report the estimated own-price demand elasticity of whiting using wave2 as the instrument.
-	Consider using speed3, the maximum wind speed from three days earlier, as the instrument for price instead of wave2.  Using only speed3 run the 1st-stage regression.  Is speed3 a strong instrument (using the F-test)?
-	Summarize this exercise in a professional-looking table like the one I shared in dropbox with all the same columns and rows, labeled correctly, but using the two different instruments (wave2 in column 2 and speed3 in column 3). 
-	Discuss why your IV estimates in columns (2) and (3) differed from one another.  How does this shed light on our discussion of the local average treatment effect (LATE) parameter?
+```{r, results='asis'}
+fs <- lm(price ~ .,fish %>% select(-(speed2:wave3),wave2,-quantity))
+stargazer(fs,type="html",omit = c("Constant","mon","tues","wed","thurs","time"),dep.var.caption = "")
+```
+
+
+**Is wave2 a strong instrument?  What is the F statistic on the excludability of the instrument from the first stage?**
+
+```{r}
+fs.strength <- summary(fs)$coefficients["wave2",]
+names(fs.strength)[3] <- "F-statistic"
+fs.strength[3] <- fs.strength[3]^2
+fs.strength[1:3] <- fs.strength[1:3] %>% round(3)
+
+knitr::kable(fs.strength %>% t()) %>% kable_styling()
+```
+
+The estimate of $wave2$ is significant. However, the F-statistic is below 10, so it might be a weak instrument. The first stage does influence price and the variation it induces on price could be a good instrument to estimate its effect on quantity. 
+
+**Report the IV estimate of the effect of price on quantity using wave2 as an instrumental variable.  How does this compare to the OLS estimate of the association between price and quantity? (is it the same, larger, smaller?).  Provide an intuitive explanation of why your OLS estimate is different from your IV estimate.**
+
+```{r manually and ivreg,results='asis'}
+fish$fitted <- fs$fitted.values # p hat!
+
+# from Wald statistic, we need reduced form
+rf <- lm(quantity ~ .,fish %>% select(-(speed2:wave3),-price,-fitted,wave2))
+wald <- rf$coefficients["wave2"]/fs.strength[1]
+
+# wald #-3581.383
+
+# manual 2SLS
+iv.manual <- lm(quantity ~ .,fish %>% select(-(speed2:wave3),-price))
+# summary(iv.manual) #-3581.383 too!
+
+iv <- ivreg(formula=quantity ~ price+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+wave2,data=fish)
+# summary(iv) #same with correct standard errors
+
+stargazer(iv.manual,iv,
+          type="html",
+          omit = c("Constant","mon","tues","wed","thurs","time"),
+          dep.var.caption = "")
+```
+
+It is different BECAUSE
+
+**Report the estimated own-price demand elasticity of whiting using wave2 as the instrument. Consider using speed3, the maximum wind speed from three days earlier, as the instrument for price instead of wave2.  Using only speed3 run the 1st-stage regression.  Is speed3 a strong instrument (using the F-test)?**
+
+
+**Summarize this exercise in a professional-looking table like the one I shared in dropbox with all the same columns and rows, labeled correctly, but using the two different instruments (wave2 in column 2 and speed3 in column 3).**
+
+
+**Discuss why your IV estimates in columns (2) and (3) differed from one another.  How does this shed light on our discussion of the local average treatment effect (LATE) parameter?**
 
