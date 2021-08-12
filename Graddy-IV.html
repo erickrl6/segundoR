@@ -284,7 +284,7 @@ F Statistic
 </tr>
 </table>
 <pre class="r"><code># modelsummary::modelsummary(ols)</code></pre>
-<p>The regression results show a value of -2484.7025369 on the price regressor. That means that the law of Marshall is observed, since an increase of 1 dollar in price induces a quantity change of -2484.7025369 tons of whiting.</p>
+<p>The regression results show a value of -2484.7025369 on the price regressor. That means that the law of Marshall is observed, since an increase of 1 dollar in price induces a quantity change of -2484.7025369 pounds of whiting.</p>
 <p>This estimate might not be causal because of the identification problem: Price and quantity are simultaneously determined in equilibria, so we’d need exogenous variation (supply shocks) to determine correctly our <span class="math inline">\(\beta_1\)</span>.</p>
 <p><strong>Why would we want to include day of the week indicators in the regression? Why would we want to include a time trend in the regression?</strong></p>
 <p>This is to capture intraweekly and seasonal variations that may confound the relationship between quantity and price (e.g. with days of more intensive activity in the market and days with less; or variations in price as time passes). This is illustrated in the following two graphs.</p>
@@ -444,9 +444,9 @@ Pr(&gt;|t|)
 </tr>
 </tbody>
 </table>
-<p>The estimate of <span class="math inline">\(wave2\)</span> is significant. However, the F-statistic is below 10, so it might be a weak instrument. The first stage does influence price and the variation it induces on price could be a good instrument to estimate its effect on quantity.</p>
+<p>The estimate of <span class="math inline">\(wave2\)</span> is significant. The F-statistic is above 10, so it might be a strong instrument. The first stage does influence price and the variation it induces on price could be a good instrument to estimate its effect on quantity.</p>
 <p><strong>Report the IV estimate of the effect of price on quantity using wave2 as an instrumental variable. How does this compare to the OLS estimate of the association between price and quantity? (is it the same, larger, smaller?). Provide an intuitive explanation of why your OLS estimate is different from your IV estimate.</strong></p>
-<pre class="r"><code>fish$fitted &lt;- fs$fitted.values # p hat!
+<pre class="r"><code>fish$fitted &lt;- fs$fitted.values # price hat!
 
 # from Wald statistic, we need reduced form
 rf &lt;- lm(quantity ~ .,fish %&gt;% select(-(speed2:wave3),-price,-fitted,wave2))
@@ -461,19 +461,20 @@ iv.manual &lt;- lm(quantity ~ .,fish %&gt;% select(-(speed2:wave3),-price))
 iv &lt;- ivreg(formula=quantity ~ price+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+wave2,data=fish)
 # summary(iv) #same with correct standard errors
 
-stargazer(iv.manual,iv,
+stargazer(iv.manual,iv,ols,
           type=&quot;html&quot;,
           omit = c(&quot;Constant&quot;,&quot;mon&quot;,&quot;tues&quot;,&quot;wed&quot;,&quot;thurs&quot;,&quot;time&quot;),
-          dep.var.caption = &quot;&quot;)</code></pre>
+          dep.var.caption = &quot;&quot;,
+          column.labels = c(&quot;Manual 2SLS&quot;,&quot;&quot;,&quot;original&quot;))</code></pre>
 <table style="text-align:center">
 <tr>
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 </td>
-<td colspan="2">
+<td colspan="3">
 quantity
 </td>
 </tr>
@@ -486,6 +487,9 @@ quantity
 <td>
 <em>instrumental</em>
 </td>
+<td>
+<em>OLS</em>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -495,6 +499,21 @@ quantity
 </td>
 <td>
 <em>variable</em>
+</td>
+<td>
+<em></em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Manual 2SLS
+</td>
+<td>
+</td>
+<td>
+original
 </td>
 </tr>
 <tr>
@@ -506,9 +525,12 @@ quantity
 <td>
 (2)
 </td>
+<td>
+(3)
+</td>
 </tr>
 <tr>
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 </td>
 </tr>
 <tr>
@@ -520,6 +542,9 @@ price
 <td>
 -3,581.383<sup>**</sup>
 </td>
+<td>
+-2,484.703<sup>***</sup>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -529,9 +554,14 @@ price
 <td>
 (1,472.552)
 </td>
+<td>
+(742.048)
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
+</td>
+<td>
 </td>
 <td>
 </td>
@@ -547,6 +577,8 @@ fitted
 </td>
 <td>
 </td>
+<td>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -556,6 +588,8 @@ fitted
 </td>
 <td>
 </td>
+<td>
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -564,14 +598,19 @@ fitted
 </td>
 <td>
 </td>
+<td>
+</td>
 </tr>
 <tr>
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 Observations
+</td>
+<td>
+97
 </td>
 <td>
 97
@@ -590,6 +629,9 @@ R<sup>2</sup>
 <td>
 0.207
 </td>
+<td>
+0.225
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
@@ -600,6 +642,9 @@ Adjusted R<sup>2</sup>
 </td>
 <td>
 0.154
+</td>
+<td>
+0.174
 </td>
 </tr>
 <tr>
@@ -612,33 +657,673 @@ Residual Std. Error (df = 90)
 <td>
 2,410.801
 </td>
+<td>
+2,382.068
+</td>
 </tr>
 <tr>
 <td style="text-align:left">
-F Statistic
+F Statistic (df = 6; 90)
 </td>
 <td>
-3.317<sup>***</sup> (df = 6; 90)
+3.317<sup>***</sup>
 </td>
 <td>
+</td>
+<td>
+4.366<sup>***</sup>
 </td>
 </tr>
 <tr>
-<td colspan="3" style="border-bottom: 1px solid black">
+<td colspan="4" style="border-bottom: 1px solid black">
 </td>
 </tr>
 <tr>
 <td style="text-align:left">
 <em>Note:</em>
 </td>
-<td colspan="2" style="text-align:right">
+<td colspan="3" style="text-align:right">
 <sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
 </td>
 </tr>
 </table>
-<p><strong>Report the estimated own-price demand elasticity of whiting using wave2 as the instrument. Consider using speed3, the maximum wind speed from three days earlier, as the instrument for price instead of wave2. Using only speed3 run the 1st-stage regression. Is speed3 a strong instrument (using the F-test)?</strong></p>
+<p>As we can see in the table, the effect estimated by instrumenting for wave heights is larger in absolute value. This can be due to many reasons: when we estimate with instrumental variables we are estimating an effect on those observations that were treated, subject to this exogenous variation. Since they are due to shocks in weather, they might have a more intense reaction.</p>
+<p><strong>Report the estimated own-price demand elasticity of whiting using wave2 as the instrument.</strong></p>
+<pre class="r"><code>ols.ln &lt;- lm(I(log(quantity)) ~ .,fish %&gt;% mutate(ln.price=log(price)) 
+             %&gt;% select(-(speed2:wave3),-price,-fitted))
+iv.manual.ln &lt;- lm(I(log(quantity)) ~ .,fish %&gt;% mutate(ln.fitted=log(fitted)) %&gt;% select(-(speed2:wave3),-price,-fitted))
+
+iv.ln &lt;- ivreg(formula=I(log(quantity)) ~ I(log(price))+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+wave2,data=fish)
+
+stargazer(iv.manual.ln,iv.ln,ols.ln,
+          type=&quot;html&quot;,
+          omit = c(&quot;Constant&quot;,&quot;mon&quot;,&quot;tues&quot;,&quot;wed&quot;,&quot;thurs&quot;,&quot;time&quot;),
+          dep.var.caption = &quot;&quot;,
+          column.labels = c(&quot;Manual 2SLS&quot;,&quot;&quot;,&quot;original&quot;),
+          dep.var.labels = &quot;Log quantity&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+Log quantity
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>OLS</em>
+</td>
+<td>
+<em>instrumental</em>
+</td>
+<td>
+<em>OLS</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em></em>
+</td>
+<td>
+<em>variable</em>
+</td>
+<td>
+<em></em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+Manual 2SLS
+</td>
+<td>
+</td>
+<td>
+original
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+I(log(price))
+</td>
+<td>
+</td>
+<td>
+-0.960<sup>**</sup>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.422)
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+ln.fitted
+</td>
+<td>
+-0.930<sup>**</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.386)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+ln.price
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+-0.549<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+(0.184)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+97
+</td>
+<td>
+97
+</td>
+<td>
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.194
+</td>
+<td>
+0.175
+</td>
+<td>
+0.219
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.140
+</td>
+<td>
+0.120
+</td>
+<td>
+0.167
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error (df = 90)
+</td>
+<td>
+0.709
+</td>
+<td>
+0.717
+</td>
+<td>
+0.698
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic (df = 6; 90)
+</td>
+<td>
+3.603<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+4.201<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>The elasticity is much bigger when using instrumented variables.</p>
+<p><strong>Consider using speed3, the maximum wind speed from three days earlier, as the instrument for price instead of wave2. Using only speed3 run the 1st-stage regression. Is speed3 a strong instrument (using the F-test)?</strong></p>
+<p>I estimate this equation:</p>
+<p><span class="math display">\[Price_t= α_0+ α_1 speed3_t+ α_3 mon_t+ α_4 tue_t+α_5 wed_t+ α_6 thurs_t+ α_7 time_t+ ω_t\]</span></p>
+<pre class="r"><code>fs2 &lt;- lm(price ~ .,fish %&gt;% select(-(speed2:wave2),-wave3,-quantity,-fitted))
+stargazer(fs2,type=&quot;html&quot;,omit = c(&quot;Constant&quot;,&quot;mon&quot;,&quot;tues&quot;,&quot;wed&quot;,&quot;thurs&quot;,&quot;time&quot;),dep.var.caption = &quot;&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+price
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+speed3
+</td>
+<td>
+0.015<sup>***</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.005)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.166
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.111
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error
+</td>
+<td>
+0.324 (df = 90)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+2.991<sup>**</sup> (df = 6; 90)
+</td>
+</tr>
+<tr>
+<td colspan="2" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
+<p>The F-test is computed to assess the strength of this instrument.</p>
+<pre class="r"><code>fs.strength2 &lt;- summary(fs2)$coefficients[&quot;speed3&quot;,]
+names(fs.strength2)[3] &lt;- &quot;F-statistic&quot;
+fs.strength2[3] &lt;- fs.strength2[3]^2
+fs.strength2[1:3] &lt;- fs.strength2[1:3] %&gt;% round(3)
+
+knitr::kable(fs.strength2 %&gt;% t()) %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:right;">
+Estimate
+</th>
+<th style="text-align:right;">
+Std. Error
+</th>
+<th style="text-align:right;">
+F-statistic
+</th>
+<th style="text-align:right;">
+Pr(&gt;|t|)
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+7.885
+</td>
+<td style="text-align:right;">
+0.0061127
+</td>
+</tr>
+</tbody>
+</table>
+<p>The estimate of <span class="math inline">\(speed3\)</span> is significant. However, the F-statistic is below 10, so it might be a weak(er) instrument. The first stage does influence price and the variation it induces on price could be a good instrument to estimate its effect on quantity.</p>
 <p><strong>Summarize this exercise in a professional-looking table like the one I shared in dropbox with all the same columns and rows, labeled correctly, but using the two different instruments (wave2 in column 2 and speed3 in column 3).</strong></p>
+<p><em>ask Scott for table</em></p>
+<pre class="r"><code># iv.manual.ln &lt;- lm(I(log(quantity)) ~ .,fish %&gt;% mutate(ln.fitted=log(fitted)) %&gt;% select(-(speed2:wave3),-price,-fitted))
+
+iv.ln2 &lt;- ivreg(formula=I(log(quantity)) ~ I(log(price))+mon+tues+wed+thurs+time|mon+tues+wed+thurs+time+speed3,data=fish)
+
+stargazer(ols.ln,iv.ln,iv.ln2,
+          type=&quot;html&quot;,
+          omit = c(&quot;Constant&quot;,&quot;mon&quot;,&quot;tues&quot;,&quot;wed&quot;,&quot;thurs&quot;,&quot;time&quot;),
+          dep.var.caption = &quot;&quot;,
+          column.labels = c(&quot;original&quot;,&quot;waves&quot;,&quot;winds&quot;),
+          dep.var.labels = &quot;Log quantity&quot;)</code></pre>
+<table style="text-align:center">
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td colspan="3">
+Log quantity
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em>OLS</em>
+</td>
+<td colspan="2">
+<em>instrumental</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+<em></em>
+</td>
+<td colspan="2">
+<em>variable</em>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+original
+</td>
+<td>
+waves
+</td>
+<td>
+winds
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(1)
+</td>
+<td>
+(2)
+</td>
+<td>
+(3)
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+I(log(price))
+</td>
+<td>
+</td>
+<td>
+-0.960<sup>**</sup>
+</td>
+<td>
+-1.960<sup>**</sup>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+(0.422)
+</td>
+<td>
+(0.907)
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+ln.price
+</td>
+<td>
+-0.549<sup>***</sup>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+(0.184)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+</td>
+<td>
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Observations
+</td>
+<td>
+97
+</td>
+<td>
+97
+</td>
+<td>
+97
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+R<sup>2</sup>
+</td>
+<td>
+0.219
+</td>
+<td>
+0.175
+</td>
+<td>
+-0.291
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Adjusted R<sup>2</sup>
+</td>
+<td>
+0.167
+</td>
+<td>
+0.120
+</td>
+<td>
+-0.377
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+Residual Std. Error (df = 90)
+</td>
+<td>
+0.698
+</td>
+<td>
+0.717
+</td>
+<td>
+0.897
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+F Statistic
+</td>
+<td>
+4.201<sup>***</sup> (df = 6; 90)
+</td>
+<td>
+</td>
+<td>
+</td>
+</tr>
+<tr>
+<td colspan="4" style="border-bottom: 1px solid black">
+</td>
+</tr>
+<tr>
+<td style="text-align:left">
+<em>Note:</em>
+</td>
+<td colspan="3" style="text-align:right">
+<sup><em></sup>p&lt;0.1; <sup><strong></sup>p&lt;0.05; <sup></strong></em></sup>p&lt;0.01
+</td>
+</tr>
+</table>
 <p><strong>Discuss why your IV estimates in columns (2) and (3) differed from one another. How does this shed light on our discussion of the local average treatment effect (LATE) parameter?</strong></p>
+<p>Even though wind speed, judging by the F-statistic, was a “worse” instrument than wave height, it induced a bigger change on the causal estimate. It might be because we are impacting on anoyher set of observations being exposed to variation thanks to wind speed, and their effect might be as well estimated as the one instrumenting for waves. This speaks of the limitations of LATE: unobservables will remain unobservable.</p>
 </div>
 
 
